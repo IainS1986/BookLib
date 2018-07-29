@@ -27,6 +27,24 @@ namespace BookLib.Core.Model
             set;
         }
 
+        public decimal Rating
+        {
+            get;
+            set;
+        }
+
+        public DateTime? PublishDate
+        {
+            get;
+            set;
+        }
+
+        public string Synopsis
+        {
+            get;
+            set;
+        }
+
         public Book()
         {
         }

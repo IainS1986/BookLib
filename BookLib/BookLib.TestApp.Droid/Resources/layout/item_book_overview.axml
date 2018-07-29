@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:local="http://schemas.android.com/apk/res-auto"
+    android:orientation="horizontal"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:minHeight="70dp"
+    android:gravity="center_vertical"
+    android:background="?android:attr/selectableItemBackground">
+    <ffimageloading.cross.MvxCachedImageView
+        android:layout_width="70dp"
+        android:layout_height="match_parent"
+        local:MvxBind="ImagePath ThumbnailURL; " />
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical">
+        <TextView
+            android:text="_title"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            local:MvxBind="Text Title"
+            android:textColor="#EE000000"
+            android:layout_marginStart="16dp"
+            android:layout_marginEnd="16dp"
+            android:textSize="20sp" />
+        <TextView
+            android:text="_3:15 PM"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            local:MvxBind="Text Author"
+            android:textColor="#44000000"
+            android:layout_marginStart="16dp"
+            android:layout_marginEnd="16dp"
+            android:textSize="12sp" />
+    </LinearLayout>
+</LinearLayout>

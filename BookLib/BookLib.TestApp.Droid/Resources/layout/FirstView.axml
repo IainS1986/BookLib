@@ -42,6 +42,21 @@
                 android:gravity="center"
                 android:layout_gravity="center"
                 local:MvxBind="Click SearchCommand" />
+            <FrameLayout
+                android:id="@+id/searchRoot"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent">
+                <MvvmCross.Droid.Support.V7.RecyclerView.MvxRecyclerView
+                    android:id="@+id/search"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    local:MvxBind="ItemsSource Books;" />
+                <ProgressBar
+                    android:layout_width="24dp"
+                    android:layout_height="24dp"
+                    android:layout_gravity="center"
+                    local:MvxBind="Visible SearchInProgress" />
+            </FrameLayout>
         </LinearLayout>
     </FrameLayout>
 </RelativeLayout>
