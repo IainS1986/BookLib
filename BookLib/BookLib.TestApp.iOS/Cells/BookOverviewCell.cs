@@ -45,6 +45,9 @@ namespace BookLib.TestApp.iOS.Cells
         {
             this.DelayBind(() =>
             {
+                CoverImage.ContentMode = UIViewContentMode.ScaleAspectFit;
+                CoverImage.Layer.MasksToBounds = true;
+
                 var set = this.CreateBindingSet<BookOverviewCell, Book>();
                 set.Bind(this).For(v => v.ThumbnailUrl).To(vm => vm.ThumbnailURL);
                 set.Bind(TitleLabel).To(vm => vm.Title);
