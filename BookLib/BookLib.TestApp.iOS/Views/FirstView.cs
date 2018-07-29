@@ -35,6 +35,7 @@ namespace BookLib.TestApp.iOS.Views
             set.Bind(SearchInProgress).For(v => v.Hidden).To(vm => vm.SearchInProgress).WithConversion(new IsFalseConverter());
             set.Bind(SearchResults).For(v => v.Hidden).To(vm => vm.SearchInProgress);
             set.Bind(_source).To(vm => vm.Books);
+            set.Bind(_source).For(v => v.SelectionChangedCommand).To(vm => vm.SelectedCommand);
             set.Apply();
         }
 

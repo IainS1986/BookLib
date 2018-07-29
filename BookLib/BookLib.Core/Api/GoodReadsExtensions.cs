@@ -11,8 +11,8 @@ namespace BookLib.Core.Api
             Book book = new Book();
             book.Author = work.Book?.Author?.Name;
             book.Title = work.Book?.Title;
-            book.ThumbnailURL = work.Book?.SmallImageURL;
-            book.ImageURL = work.Book?.ImageURL;
+            book.ThumbnailURL = work.Book?.ImageURL;
+            book.ImageURL = work.Book?.ImageURL.Replace("m/", "l/").Replace("col", "com");//Experiment
             book.Rating = work.Rating;
 
             //Date

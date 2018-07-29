@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.XIB" version="3.0" toolsVersion="14113" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES">
+    <device id="retina4_7" orientation="portrait">
+        <adaptation id="fullscreen"/>
+    </device>
+    <dependencies>
+        <deployment identifier="iOS"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="14088"/>
+        <capability name="Safe area layout guides" minToolsVersion="9.0"/>
+        <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
+    </dependencies>
+    <objects>
+        <placeholder placeholderIdentifier="IBFilesOwner" id="-1" userLabel="File's Owner" customClass="BookView">
+            <connections>
+                <outlet property="CoverImage" destination="ts2-8C-WsY" id="T7w-Ki-CIm"/>
+                <outlet property="ImageLoading" destination="C3z-JW-HM7" id="oYM-dL-Q3l"/>
+                <outlet property="view" destination="1" id="RRd-Eg-VrN"/>
+            </connections>
+        </placeholder>
+        <placeholder placeholderIdentifier="IBFirstResponder" id="-2" customClass="UIResponder"/>
+        <view contentMode="scaleToFill" id="1">
+            <rect key="frame" x="0.0" y="0.0" width="375" height="603"/>
+            <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+            <subviews>
+                <imageView userInteractionEnabled="NO" contentMode="scaleAspectFit" horizontalHuggingPriority="251" verticalHuggingPriority="251" translatesAutoresizingMaskIntoConstraints="NO" id="ts2-8C-WsY">
+                    <rect key="frame" x="0.0" y="0.0" width="375" height="603"/>
+                </imageView>
+                <activityIndicatorView opaque="NO" contentMode="scaleToFill" horizontalHuggingPriority="750" verticalHuggingPriority="750" style="gray" translatesAutoresizingMaskIntoConstraints="NO" id="C3z-JW-HM7">
+                    <rect key="frame" x="177" y="291" width="20" height="20"/>
+                </activityIndicatorView>
+            </subviews>
+            <color key="backgroundColor" red="1" green="1" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+            <constraints>
+                <constraint firstItem="ts2-8C-WsY" firstAttribute="top" secondItem="y21-fw-XCP" secondAttribute="top" id="BZM-La-pOt"/>
+                <constraint firstItem="C3z-JW-HM7" firstAttribute="centerX" secondItem="ts2-8C-WsY" secondAttribute="centerX" id="KCr-hM-yOT"/>
+                <constraint firstItem="C3z-JW-HM7" firstAttribute="centerY" secondItem="ts2-8C-WsY" secondAttribute="centerY" id="Sc1-HZ-eIv"/>
+                <constraint firstItem="y21-fw-XCP" firstAttribute="bottom" secondItem="ts2-8C-WsY" secondAttribute="bottom" id="U0F-yi-wMO"/>
+                <constraint firstItem="ts2-8C-WsY" firstAttribute="width" secondItem="1" secondAttribute="width" id="bfB-7P-ndf"/>
+                <constraint firstItem="ts2-8C-WsY" firstAttribute="centerX" secondItem="y21-fw-XCP" secondAttribute="centerX" id="mtQ-KV-1h2"/>
+            </constraints>
+            <simulatedNavigationBarMetrics key="simulatedTopBarMetrics" translucent="NO" prompted="NO"/>
+            <viewLayoutGuide key="safeArea" id="y21-fw-XCP"/>
+            <point key="canvasLocation" x="33.5" y="53.5"/>
+        </view>
+    </objects>
+</document>

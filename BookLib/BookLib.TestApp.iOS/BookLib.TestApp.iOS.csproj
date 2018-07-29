@@ -102,6 +102,10 @@
     <Compile Include="Cells\BookOverviewCell.designer.cs">
       <DependentUpon>BookOverviewCell.cs</DependentUpon>
     </Compile>
+    <Compile Include="Views\BookView.cs" />
+    <Compile Include="Views\BookView.designer.cs">
+      <DependentUpon>BookView.cs</DependentUpon>
+    </Compile>
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Setup.cs" />
@@ -112,6 +116,7 @@
     <InterfaceDefinition Include="Resources\LaunchScreen.xib" />
     <InterfaceDefinition Include="Views\FirstView.xib" />
     <InterfaceDefinition Include="Cells\BookOverviewCell.xib" />
+    <InterfaceDefinition Include="Views\BookView.xib" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

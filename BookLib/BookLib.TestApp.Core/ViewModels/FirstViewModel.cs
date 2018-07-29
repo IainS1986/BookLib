@@ -12,6 +12,8 @@ namespace BookLib.TestApp.Core.ViewModels
 
         public MvxAsyncCommand SearchCommand => new MvxAsyncCommand(OnSearch);
 
+        public MvxAsyncCommand<Book> SelectedCommand => new MvxAsyncCommand<Book>(NavigateToBookDetails);
+
         private string _searchString;
         public string Search
         {
@@ -57,9 +59,13 @@ namespace BookLib.TestApp.Core.ViewModels
                 SearchInProgress = true;
                 Books.Clear();
                 Books.AddRange(await _searchService.Search(Search));
-                RaisePropertyChanged(() => Books);
                 SearchInProgress = false;
             });
+        }
+
+        private async Task NavigateToBookDetails(Book book)
+        {
+            await NavigationService.Navigate<BookViewModel, Book>(book);
         }
     }
 }
