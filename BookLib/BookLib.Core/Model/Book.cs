@@ -39,7 +39,24 @@ namespace BookLib.Core.Model
             set;
         }
 
+        public string PublishDateFormatted
+        {
+            get
+            {
+                if (PublishDate.HasValue == false)
+                    return string.Empty;
+
+                return PublishDate.Value.ToShortDateString();
+            }
+        }
+
         public string Synopsis
+        {
+            get;
+            set;
+        }
+
+        public string Genre
         {
             get;
             set;

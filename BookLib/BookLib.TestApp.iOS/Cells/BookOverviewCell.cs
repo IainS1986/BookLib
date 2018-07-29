@@ -5,6 +5,7 @@ using MvvmCross.Binding.BindingContext;
 using UIKit;
 using BookLib.Core.Model;
 using SDWebImage;
+using BookLib.TestApp.iOS.Extensions;
 
 namespace BookLib.TestApp.iOS.Cells
 {
@@ -47,6 +48,7 @@ namespace BookLib.TestApp.iOS.Cells
             {
                 CoverImage.ContentMode = UIViewContentMode.ScaleAspectFit;
                 CoverImage.Layer.MasksToBounds = true;
+                CoverImage.Alpha = 0;//Hide to fade in
 
                 var set = this.CreateBindingSet<BookOverviewCell, Book>();
                 set.Bind(this).For(v => v.ThumbnailUrl).To(vm => vm.ThumbnailURL);
@@ -58,6 +60,7 @@ namespace BookLib.TestApp.iOS.Cells
 
         void ProgressHandler(nint receivedSize, nint expectedSize)
         {
+            CoverImage.Alpha = 0;
             ImageLoading.Hidden = false;
             ImageLoading.StartAnimating();
         }
@@ -66,6 +69,7 @@ namespace BookLib.TestApp.iOS.Cells
         {
             ImageLoading.StopAnimating();
             ImageLoading.Hidden = true;
+            CoverImage.FadeIn();
         }
     }
 }

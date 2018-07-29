@@ -106,6 +106,7 @@
     <Compile Include="Views\BookView.designer.cs">
       <DependentUpon>BookView.cs</DependentUpon>
     </Compile>
+    <Compile Include="Extensions\UIViewExtensions.cs" />
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Setup.cs" />
@@ -214,6 +215,7 @@
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Cells\" />
+    <Folder Include="Extensions\" />
   </ItemGroup>
   <Import Project="$(MSBuildExtensionsPath)\Xamarin\iOS\Xamarin.iOS.CSharp.targets" />
 </Project>
