@@ -31,16 +31,34 @@ namespace BookLib.TestApp.iOS.Views
 		UIKit.UILabel PublishDateLabel { get; set; }
 
 		[Outlet]
-		UIKit.UILabel SynopsisLabel { get; set; }
+		UIKit.UITextView SynopsisLabel { get; set; }
+
+		[Outlet]
+		UIKit.UIActivityIndicatorView SynopsisLoading { get; set; }
 
 		[Outlet]
 		UIKit.UILabel TitleLabel { get; set; }
 		
 		void ReleaseDesignerOutlets ()
 		{
+			if (SynopsisLoading != null) {
+				SynopsisLoading.Dispose ();
+				SynopsisLoading = null;
+			}
+
+			if (AuthorLabel != null) {
+				AuthorLabel.Dispose ();
+				AuthorLabel = null;
+			}
+
 			if (CoverImage != null) {
 				CoverImage.Dispose ();
 				CoverImage = null;
+			}
+
+			if (GenreLabel != null) {
+				GenreLabel.Dispose ();
+				GenreLabel = null;
 			}
 
 			if (ImageLoading != null) {
@@ -53,14 +71,9 @@ namespace BookLib.TestApp.iOS.Views
 				OverviewRoot = null;
 			}
 
-			if (TitleLabel != null) {
-				TitleLabel.Dispose ();
-				TitleLabel = null;
-			}
-
-			if (AuthorLabel != null) {
-				AuthorLabel.Dispose ();
-				AuthorLabel = null;
+			if (PublishDateLabel != null) {
+				PublishDateLabel.Dispose ();
+				PublishDateLabel = null;
 			}
 
 			if (SynopsisLabel != null) {
@@ -68,14 +81,9 @@ namespace BookLib.TestApp.iOS.Views
 				SynopsisLabel = null;
 			}
 
-			if (PublishDateLabel != null) {
-				PublishDateLabel.Dispose ();
-				PublishDateLabel = null;
-			}
-
-			if (GenreLabel != null) {
-				GenreLabel.Dispose ();
-				GenreLabel = null;
+			if (TitleLabel != null) {
+				TitleLabel.Dispose ();
+				TitleLabel = null;
 			}
 		}
 	}

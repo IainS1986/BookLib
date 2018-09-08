@@ -1,10 +1,14 @@
+using System.Threading.Tasks;
 using BookLib.Core.Model;
+using BookLib.Core.Search;
 using MvvmCross.ViewModels;
 
 namespace BookLib.TestApp.Core.ViewModels
 {
     public class BookViewModel : MvxViewModel<Book>
     {
+        private ISearchService _searchService;
+
         private Book _book;
         public Book Details
         {
@@ -12,9 +16,37 @@ namespace BookLib.TestApp.Core.ViewModels
             set { SetProperty(ref _book, value); }
         }
 
+        private bool _loading;
+        public bool Loading
+        {
+            get => _loading;
+            set => SetProperty(ref _loading, value);
+        }
+
+        public BookViewModel(ISearchService search)
+        {
+            _searchService = search;
+        }
+
         public override void Prepare(Book parameter)
         {
             Details = parameter;
+        }
+
+        public override async Task Initialize()
+        {
+            Loading = true;
+
+            //TODO Remove this one Synopsis call is actually asynchronous!
+            await Task.Yield();
+
+            await _searchService.Synopsis(Details);
+
+            RaisePropertyChanged(() => Details);
+
+            Loading = false;
+
+            await base.Initialize();
         }
     }
 }

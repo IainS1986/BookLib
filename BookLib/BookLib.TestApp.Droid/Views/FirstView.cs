@@ -8,7 +8,7 @@ using MvvmCross.Droid.Support.V7.RecyclerView.ItemTemplates;
 
 namespace BookLib.TestApp.Droid.Views
 {
-    [Activity(Label = "View for FirstViewModel")]
+    [Activity(Label = "Search Audiobooks")]
     public class FirstView : BaseView
     {
         protected override int LayoutResource => Resource.Layout.FirstView;

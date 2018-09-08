@@ -3,6 +3,12 @@ namespace BookLib.Core.Model
 {
     public class Book
     {
+        public string Key
+        {
+            get;
+            set;
+        }
+
         public string Author
         {
             get;
@@ -10,6 +16,12 @@ namespace BookLib.Core.Model
         }
 
         public string Title
+        {
+            get;
+            set;
+        }
+
+        public string Narrator
         {
             get;
             set;

@@ -13,7 +13,7 @@ using Refit;
 
 namespace BookLib.Core.Search
 {
-    public class SearchService : ISearchService
+    public class GoodReadsSearchService : ISearchService
     {
         public async Task<List<Book>> Search(string search)
         {
@@ -22,6 +22,11 @@ namespace BookLib.Core.Search
             var result = ParseResponse<GoodReadsSearchResponse>(response, GoodReadsConsts.XMLRootName);
 
             return result?.Search?.SearchResults?.Results?.Select(x => x.ToBook()).ToList();
+        }
+
+        public Task<bool> Synopsis(Book book)
+        {
+            throw new NotImplementedException();
         }
 
         private T ParseResponse<T>(string result, string rootName) where T : class

@@ -8,5 +8,6 @@ namespace BookLib.Core.Search
     public interface ISearchService
     {
         Task<List<Book>> Search(string search);
+        Task<bool> Synopsis(Book book);
     }
 }
