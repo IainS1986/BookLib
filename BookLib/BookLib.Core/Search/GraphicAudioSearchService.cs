@@ -18,7 +18,7 @@ namespace BookLib.Core.Search
             string query = $"/catalogsearch/result/?q={search}";
             string response = await HTMLHelpers.CreateHttpRequest(new Uri($"{GraphicAudioConsts.BaseURL}{query}"));
 
-            string regexResultQuery = "(?<=<li class=\"item col-md - 3 col - smh - 4\">)(.*)(?=<\\/li>)";
+            string regexResultQuery = "(?=<li class=\"item col-md - 3 col - smh - 4\">)(.*?)(?<=<\\/li>)";
             var product = Regex.Matches(response, regexResultQuery, RegexOptions.Singleline);
 
             return new List<Book>();
