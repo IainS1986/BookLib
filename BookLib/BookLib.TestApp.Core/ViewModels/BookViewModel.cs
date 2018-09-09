@@ -37,7 +37,7 @@ namespace BookLib.TestApp.Core.ViewModels
         {
             Loading = true;
 
-            await _searchService.Synopsis(Details);
+            await _searchService.GetExtraDetails(Details);
 
             RaisePropertyChanged(() => Details);
 

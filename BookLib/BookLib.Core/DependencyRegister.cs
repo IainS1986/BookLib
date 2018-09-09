@@ -8,7 +8,8 @@ namespace BookLib.Core
         public static void Register()
         {
             //Mvx.LazyConstructAndRegisterSingleton<ISearchService, GoodReadsSearchService>();
-            Mvx.LazyConstructAndRegisterSingleton<ISearchService, AudibleSearchService>();
+            //Mvx.LazyConstructAndRegisterSingleton<ISearchService, AudibleSearchService>();
+            Mvx.LazyConstructAndRegisterSingleton<ISearchService, GraphicAudioSearchService>();
         }
     }
 }

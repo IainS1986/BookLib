@@ -77,30 +77,43 @@ namespace BookLib.Core.Search
             return books;
         }
 
-        public async Task<bool> Synopsis(Book book)
+        public async Task<bool> GetExtraDetails(Book book)
         {
-            Console.WriteLine($"Scraping for Synopsis for {book.ProductPage}");
+            if (book == null ||
+                string.IsNullOrEmpty(book.ProductPage))
+            {
+                return false;
+            }
 
-            book.Synopsis = await GetSynopsis(book.ProductPage);
+            Console.WriteLine($"Scraping for Extra Details for {book.ProductPage}");
 
-            Console.WriteLine($"Done!");
-
-            return !string.IsNullOrEmpty(book?.Synopsis);
-        }
-
-        private async Task<string> GetSynopsis(string url)
-        {
-            string bookPage = $"{AudibleConsts.BaseURL}/pd/{url}";
+            string bookPage = $"{AudibleConsts.BaseURL}/pd/{book.ProductPage}";
             string bookHTML = await HTMLHelpers.CreateHttpRequest(new Uri(bookPage));
 
+            try
+            {
+                book.Synopsis = GetSynopsis(bookHTML);
+            }
+            catch(Exception ex)
+            {
+                Console.WriteLine($"Error fetching extra details for {book} - {ex.Message}");
+                return false;
+            }
+
+            Console.WriteLine($"Done!");
+            return true;
+        }
+
+        private string GetSynopsis(string html)
+        {
             string search = ">Summary<";
-            int index = bookHTML.IndexOf(search, StringComparison.Ordinal);
+            int index = html.IndexOf(search, StringComparison.Ordinal);
             if (index == -1)
             {
                 return string.Empty;
             }
 
-            string subHTML = bookHTML.Substring(index);
+            string subHTML = html.Substring(index);
             search = "bc-color-secondary\"  >";
             index = subHTML.IndexOf(search, StringComparison.Ordinal);
             if (index == -1)

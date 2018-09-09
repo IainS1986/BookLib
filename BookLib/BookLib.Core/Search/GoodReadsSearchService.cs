@@ -24,7 +24,7 @@ namespace BookLib.Core.Search
             return result?.Search?.SearchResults?.Results?.Select(x => x.ToBook()).ToList();
         }
 
-        public Task<bool> Synopsis(Book book)
+        public Task<bool> GetExtraDetails(Book book)
         {
             throw new NotImplementedException();
         }
