@@ -37,9 +37,6 @@ namespace BookLib.TestApp.Core.ViewModels
         {
             Loading = true;
 
-            //TODO Remove this one Synopsis call is actually asynchronous!
-            await Task.Yield();
-
             await _searchService.Synopsis(Details);
 
             RaisePropertyChanged(() => Details);

@@ -3,7 +3,7 @@ namespace BookLib.Core.Model
 {
     public class Book
     {
-        public string Key
+        public string ProductPage
         {
             get;
             set;

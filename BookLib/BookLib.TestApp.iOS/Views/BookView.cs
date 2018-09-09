@@ -21,6 +21,11 @@ namespace BookLib.TestApp.iOS.Views
 
             set
             {
+                if(string.Equals(_imageUrl, value, StringComparison.CurrentCultureIgnoreCase))
+                {
+                    return;
+                }
+
                 _imageUrl = value;
 
                 if (string.IsNullOrEmpty(_imageUrl))
