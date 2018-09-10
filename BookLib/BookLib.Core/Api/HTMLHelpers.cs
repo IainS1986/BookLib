@@ -101,5 +101,29 @@ namespace BookLib.Core.Api
             string substring = html.Substring(startIndex, (lastIndex) - startIndex);
             return substring.Trim();
         }
+
+        public static string Scrape(string html, string searchString, string endTag)
+        {
+            int index = html.IndexOf(searchString);
+            if (index == -1)
+            {
+                return "N/A";
+            }
+
+            //Scan until />
+            bool closedTag = false;
+            index += searchString.Length;
+            int lastIndex = index;
+            while (!closedTag)
+            {
+                lastIndex++;
+                //Look for endTag
+                string tagCheck = html.Substring(lastIndex - endTag.Length, endTag.Length);
+                closedTag = string.Equals(tagCheck, endTag);
+            }
+            lastIndex -= endTag.Length;
+
+            return html.Substring(index, lastIndex - index);
+        }
     }
 }

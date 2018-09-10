@@ -114,29 +114,7 @@ namespace BookLib.Core.Search
             }
 
             string subHTML = html.Substring(index);
-            search = "bc-color-secondary\"  >";
-            index = subHTML.IndexOf(search, StringComparison.Ordinal);
-            if (index == -1)
-            {
-                return string.Empty;
-            }
-            index += search.Length;
-
-            // Scan until we find </span>
-            bool spanClosed = false;
-            int lastIndex = index;
-            // Read title until you find an open <
-            while (!spanClosed)
-            {
-                lastIndex++;
-                //Look at last 7 chars to see if its </span>
-                string substring = subHTML.Substring(lastIndex - 7, 7);
-                spanClosed = string.Equals(substring, "</span>");
-            }
-
-            lastIndex -= 7;
-            string synopsis = subHTML.Substring(index, lastIndex - index);
-            return synopsis;
+            return HTMLHelpers.Scrape(subHTML, "bc-color-secondary\"  >", "</span>");
         }
 
         private string GetCoverID(string html, Match cover)
