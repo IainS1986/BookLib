@@ -28,6 +28,7 @@ namespace BookLib.Core.Search
                     html = HttpUtility.HtmlDecode(html);
                     html = html.Replace(" colspan=2", string.Empty); //wut?
                     Book book = new Book();
+                    book.Engine = SearchType.BigFinish;
 
                     XmlDocument xmlDocument = new XmlDocument();
                     xmlDocument.LoadXml(html);

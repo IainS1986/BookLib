@@ -1,8 +1,16 @@
 ﻿using System;
+using BookLib.Core.Search;
+
 namespace BookLib.Core.Model
 {
     public class Book
     {
+        public SearchType Engine
+        {
+            get;
+            set;
+        }
+
         public string ProductPage
         {
             get;

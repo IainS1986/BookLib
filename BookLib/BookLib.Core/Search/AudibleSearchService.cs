@@ -58,9 +58,10 @@ namespace BookLib.Core.Search
 
                     books.Add(new Book()
                     {
+                        Engine = SearchType.Audible,
                         ProductPage = entry.Key.Value,
                         Title = GetTitle(entry.Value, $"{entry.Key}?qid"),
-                        Author = $"{GetAuthor(entry.Value)} / {GetNarrator(entry.Value)}",
+                        Author = $"{GetAuthor(entry.Value)}",
                         Narrator = GetNarrator(entry.Value),
                         PublishDate = GetReleaseDate(entry.Value),
                         ThumbnailURL = string.Format(AudibleCoverURL, id, 128),

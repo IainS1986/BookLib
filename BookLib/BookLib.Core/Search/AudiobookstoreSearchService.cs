@@ -7,6 +7,8 @@ using System.Web;
 using System.Xml;
 using BookLib.Core.Api;
 using BookLib.Core.Model;
+using BookLib.Core.Model.Audiobookstore;
+using Newtonsoft.Json;
 
 namespace BookLib.Core.Search
 {
@@ -34,6 +36,7 @@ namespace BookLib.Core.Search
                     html = HttpUtility.HtmlDecode(html);
                     html = html.Replace("&", "and");
                     Book book = new Book();
+                    book.Engine = SearchType.Audiobookstore;
 
                     XmlDocument xmlDocument = new XmlDocument();
                     xmlDocument.LoadXml(html);
@@ -69,7 +72,6 @@ namespace BookLib.Core.Search
                 var singleResult = ParseProductHTML(response);
                 if (singleResult != null)
                 {
-                    singleResult.Title = search;
                     books.Add(singleResult);
                 }
             }
@@ -113,6 +115,27 @@ namespace BookLib.Core.Search
             try
             {
                 Book book = new Book();
+
+                // JSon Regex
+                string jsonRegex = "(?<=<script type=\"application/ld\\+json\">)(.*?)(?=</script>)";
+                Match jsonMatch = Regex.Match(response, jsonRegex, RegexOptions.Singleline);
+                RootObject root = JsonConvert.DeserializeObject<RootObject>(jsonMatch.Value);
+                if (root != null)
+                {
+                    book.Engine = SearchType.Audiobookstore;
+                    book.Title = root?.mainEntity?.name;
+                    book.Author = root?.mainEntity?.author?.name;
+                    book.Narrator = root?.mainEntity?.readBy?.name;
+                    book.Synopsis = root?.mainEntity?.description;
+                    book.ThumbnailURL = root?.mainEntity?.image;
+                    book.ImageURL = root?.mainEntity?.image;
+
+                    DateTime publishDate;
+                    if (DateTime.TryParse(root?.mainEntity?.datePublished, out publishDate))
+                    {
+                        book.PublishDate = publishDate;
+                    }
+                }
 
                 // Cover image regex
                 string coverRegex = "(?=<span class=\"supersize-thumb-inner\">)(.*?)(?<=</span>)";

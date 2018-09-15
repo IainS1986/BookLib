@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
+using System.Web;
 using System.Xml;
 using BookLib.Core.Api;
 using BookLib.Core.Model;
@@ -16,7 +17,8 @@ namespace BookLib.Core.Search
             // Anoyingly, Graphic Audio can either return search results OR
             // returns a Series overview if it decides you're searching for a 
             // series - i.e. Search for Batman will return DC Series overview :/
-            string query = $"/catalogsearch/result/?q={search}";
+            string encodedSearch = HttpUtility.UrlEncode(search).Replace("+", "%20");
+            string query = $"/catalogsearch/result/?q={encodedSearch}";
             string response = await HTMLHelpers.CreateHttpRequest(new Uri($"{GraphicAudioConsts.BaseURL}{query}"));
 
             string regexResultQuery = "(?=<li class=\"item col-md-3 col-smh-4\">)(.*?)(?<=<\\/li>)";
@@ -29,6 +31,7 @@ namespace BookLib.Core.Search
                 try
                 {
                     Book book = new Book();
+                    book.Engine = SearchType.GraphicAudio;
 
                     XmlDocument xmlDocument = new XmlDocument();
                     xmlDocument.LoadXml(prod.Value);

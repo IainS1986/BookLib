@@ -9,6 +9,7 @@ namespace BookLib.Core.Api
         public static Book ToBook(this GoodReadsWork work)
         {
             Book book = new Book();
+            book.Engine = Search.SearchType.GoodReads;
             book.Author = work.Book?.Author?.Name;
             book.Title = work.Book?.Title;
             book.ThumbnailURL = work.Book?.ImageURL;

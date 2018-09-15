@@ -15,6 +15,7 @@
     <Folder Include="Api\DTO\" />
     <Folder Include="Api\DTO\GoodReads\" />
     <Folder Include="Converters\" />
+    <Folder Include="Model\Audiobookstore\" />
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="MvvmCross" Version="6.1.2" />
@@ -22,5 +23,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Remove="Properties\AssemblyInfo.cs" />
+    <Compile Remove="Search\BigFinishSearchService %28copy%29.cs" />
+    <Compile Remove="Api\BigFinishConsts %28copy%29.cs" />
   </ItemGroup>
 </Project>
