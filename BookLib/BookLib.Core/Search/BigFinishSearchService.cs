@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
+using System.Web;
 using System.Xml;
 using BookLib.Core.Api;
 using BookLib.Core.Model;
@@ -24,14 +25,8 @@ namespace BookLib.Core.Search
                 foreach (Match prod in products)
                 {
                     string html = $"<html><head></head><body>{prod.Value}</body></html>";
-                    html = html.Replace("&pound;", "£");
-                    html = html.Replace("&rsquo;", "'");
-                    html = html.Replace("&lsquo;", "'");
-                    html = html.Replace("&ldquo;", "\"");
-                    html = html.Replace("&rdquo;", "\"");
-                    html = html.Replace("&nbsp;", " ");
-                    html = html.Replace("&hellip;", "...");
-                    html = html.Replace(" colspan=2", string.Empty);
+                    html = HttpUtility.HtmlDecode(html);
+                    html = html.Replace(" colspan=2", string.Empty); //wut?
                     Book book = new Book();
 
                     XmlDocument xmlDocument = new XmlDocument();

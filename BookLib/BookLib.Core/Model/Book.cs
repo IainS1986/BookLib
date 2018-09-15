@@ -58,7 +58,7 @@ namespace BookLib.Core.Model
                 if (PublishDate.HasValue == false)
                     return string.Empty;
 
-                return PublishDate.Value.ToShortDateString();
+                return PublishDate.Value.ToString("MMMM yyyy");
             }
         }
 
