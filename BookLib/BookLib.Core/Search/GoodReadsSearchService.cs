@@ -26,7 +26,7 @@ namespace BookLib.Core.Search
 
         public Task<bool> GetExtraDetails(Book book)
         {
-            throw new NotImplementedException();
+            return Task.FromResult<bool>(true);
         }
 
         private T ParseResponse<T>(string result, string rootName) where T : class
