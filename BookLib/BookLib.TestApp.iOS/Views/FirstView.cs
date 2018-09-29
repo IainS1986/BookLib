@@ -36,6 +36,8 @@ namespace BookLib.TestApp.iOS.Views
             set.Bind(SearchResults).For(v => v.Hidden).To(vm => vm.SearchInProgress);
             set.Bind(_source).To(vm => vm.Books);
             set.Bind(_source).For(v => v.SelectionChangedCommand).To(vm => vm.SelectedCommand);
+            set.Bind(ModeButton).For("Title").To(vm => vm.Engine);
+            set.Bind(ModeButton).To(vm => vm.EngineCommand);
             set.Apply();
         }
 

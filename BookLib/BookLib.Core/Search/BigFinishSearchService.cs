@@ -1,11 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Text.RegularExpressions;
+using System.Linq;
 using System.Threading.Tasks;
-using System.Web;
-using System.Xml;
 using BookLib.Core.Api;
 using BookLib.Core.Model;
+using HtmlAgilityPack;
 
 namespace BookLib.Core.Search
 {
@@ -13,40 +12,40 @@ namespace BookLib.Core.Search
     {
         public async Task<List<Book>> Search(string search)
         {
-            string query = $"/search_results?txtSearch={search}";
+            string query = $"/search_results?txtSearch={HTMLHelpers.EncodeSearch(search)}";
             string response = await HTMLHelpers.CreateHttpRequest(new Uri($"{BigFinishConsts.BaseURL}{query}"));
             List<Book> books = new List<Book>();
+            var htmlDoc = new HtmlDocument();
+            htmlDoc.LoadHtml(response);
 
-            try
+            // Get all books
+            var products = htmlDoc.DocumentNode.Descendants("div").
+                                   Where(x => x.Attributes != null &&
+                                              x.Attributes.Any(y => y.Name == "class" &&
+                                                                    y.Value == "releaseListing with-bottom-border")).ToList();
+
+            foreach(var prod in products)
             {
-                //Regex to get all product HTML chunks
-                string regex = "(?<=<div class=\"releaseListing with-bottom-border\">)(.*?)(?<=<div class=\"clear-both\"></div>)";
-                MatchCollection products = Regex.Matches(response, regex, RegexOptions.Singleline);
-                foreach (Match prod in products)
+                try
                 {
-                    string html = $"<html><head></head><body>{prod.Value}</body></html>";
-                    html = HttpUtility.HtmlDecode(html);
-                    html = html.Replace(" colspan=2", string.Empty); //wut?
                     Book book = new Book();
                     book.Engine = SearchType.BigFinish;
 
-                    XmlDocument xmlDocument = new XmlDocument();
-                    xmlDocument.LoadXml(html);
+                    // Product Link
+                    var prodLinkNode = prod.Descendants("div").
+                                           Where(x => x.Attributes != null &&
+                                                      x.Attributes.Any(y => y.Name == "class" &&
+                                                                            y.Value == "coverRelease")).FirstOrDefault();
 
-                    //Product Link
-                    XmlNode coverReleaseNode = xmlDocument.SelectSingleNode(".//div[contains(@class, 'coverRelease')]");
-                    XmlNode productURLNode = coverReleaseNode.SelectSingleNode(".//a");
-                    book.ProductPage = productURLNode.Attributes["href"].Value;
-
-                    //Covers
-                    XmlNode imgNode = coverReleaseNode.SelectSingleNode(".//img");
-                    book.ThumbnailURL = $"{BigFinishConsts.BaseURL}{imgNode.Attributes["src"].Value}";
+                    // Covers
+                    var imgLinkNode = prodLinkNode.Descendants("img").FirstOrDefault();
+                    book.ThumbnailURL = $"{BigFinishConsts.BaseURL}{imgLinkNode?.Attributes["src"].Value}";
                     book.ImageURL = book.ThumbnailURL.Replace("medium", "large");
 
-                    //Release date
-                    XmlNode releaseNode = coverReleaseNode.SelectSingleNode(".//p[contains(@class, 'status soon')]");
-                    string releaseString = releaseNode.InnerXml.Trim();
+                    // Release Date
+                    var pLinkNode = prodLinkNode.Descendants("p").FirstOrDefault();
                     //Remove the annoying formatting
+                    var releaseString = pLinkNode.InnerHtml.Trim();
                     releaseString = releaseString.Replace("Released ", string.Empty);
                     DateTime releaseDate;
                     if (DateTime.TryParse(releaseString, out releaseDate))
@@ -54,32 +53,39 @@ namespace BookLib.Core.Search
                         book.PublishDate = releaseDate;
                     }
 
-                    //Series Name
-                    XmlNode rangeNode = xmlDocument.SelectSingleNode(".//span[contains(@class, 'rangeName')]");
-                    XmlNode rangeNameNode = rangeNode.SelectSingleNode(".//a");
-                    string rangeName = rangeNameNode.InnerText.Trim();
-                    rangeName = rangeName.Replace("\r", string.Empty);
-                    rangeName = rangeName.Replace("\n", string.Empty);
-                    rangeName = rangeName.Replace("\t", string.Empty);
+                    // Series Name
+                    var seriesNode = prod.Descendants("span").
+                                           Where(x => x.Attributes != null &&
+                                                      x.Attributes.Any(y => y.Name == "class" &&
+                                                                       y.Value == "rangeName")).FirstOrDefault();
+                    var aSeriesNode = seriesNode?.Descendants("a").FirstOrDefault();
+                    string seriesName = aSeriesNode?.InnerText.Trim().
+                                                   Replace("\r", string.Empty).
+                                                   Replace("\n", string.Empty).
+                                                   Replace("\t", string.Empty);
+                    book.Series = seriesName;
+                    book.SeriesPage = aSeriesNode?.Attributes["href"].Value;
 
-                    //Book Name
-                    XmlNode titleNode = xmlDocument.SelectSingleNode(".//h3[contains(@class, 'releaseHeader')]");
-                    XmlNode titleNameNode = titleNode.SelectSingleNode(".//a");
-                    string title = titleNameNode.InnerText.Trim();
-                    title = title.Replace("\r", string.Empty);
-                    title = title.Replace("\n", string.Empty);
-                    title = title.Replace("\t", string.Empty);
+                    // Book name
+                    var bookNode = prod.Descendants("h3").
+                                           Where(x => x.Attributes != null &&
+                                                      x.Attributes.Any(y => y.Name == "class" &&
+                                                                       y.Value == "releaseHeader")).FirstOrDefault();
+                    var aBookNode = bookNode?.Descendants("a").FirstOrDefault();
+                    string bookName = aBookNode?.InnerText.Trim().
+                                                   Replace("\r", string.Empty).
+                                                   Replace("\n", string.Empty).
+                                                   Replace("\t", string.Empty);
+                    book.Title = bookName;
+                    book.ProductPage = aBookNode?.Attributes["href"].Value;
 
-                    book.Title = title;
                     books.Add(book);
-
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine($"Error parsing search for {search}, {ex.Message}");
                 }
             }
-            catch(Exception ex)
-            {
-                Console.WriteLine($"Error parsing BigFinish search results {ex.Message}");
-            }
-
             return books;
         }
 
@@ -90,7 +96,14 @@ namespace BookLib.Core.Search
             try
             {
                 string response = await HTMLHelpers.CreateHttpRequest(new Uri(productURL));
-                book.Synopsis = HTMLHelpers.Scrape(response, "<div class=\"releaseContent\">", "<p class=\"writerDirector\">");
+                var htmlDoc = new HtmlDocument();
+                htmlDoc.LoadHtml(response);
+
+                var synopsis = htmlDoc.DocumentNode.Descendants("div").Where(x => x.Attributes != null &&
+                                                                                  x.Attributes.Any(y => y.Name == "class" &&
+                                                                                                        y.Value == "releaseContent")).FirstOrDefault();
+                book.Synopsis = synopsis?.InnerHtml;
+                return true;
             }
             catch(Exception ex)
             {

@@ -82,6 +82,18 @@ namespace BookLib.Core.Model
             set;
         }
 
+        public string Series
+        {
+            get;
+            set;
+        }
+
+        public string SeriesPage
+        {
+            get;
+            set;
+        }
+
         public Book()
         {
         }

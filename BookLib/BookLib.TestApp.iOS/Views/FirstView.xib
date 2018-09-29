@@ -12,6 +12,7 @@
     <objects>
         <placeholder placeholderIdentifier="IBFilesOwner" id="-1" userLabel="File's Owner" customClass="FirstView">
             <connections>
+                <outlet property="ModeButton" destination="p7B-we-2S3" id="sda-Fq-len"/>
                 <outlet property="SearchButton" destination="DzS-F5-jJU" id="KHI-T2-Gk8"/>
                 <outlet property="SearchInProgress" destination="f9T-W6-lIF" id="Bxl-hk-IQh"/>
                 <outlet property="SearchInput" destination="JzX-CJ-QJc" id="fEq-4q-vbi"/>
@@ -36,13 +37,6 @@
                     <fontDescription key="fontDescription" type="system" pointSize="14"/>
                     <textInputTraits key="textInputTraits"/>
                 </textField>
-                <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="DzS-F5-jJU">
-                    <rect key="frame" x="121" y="94" width="133" height="30"/>
-                    <constraints>
-                        <constraint firstAttribute="width" constant="133" id="YkZ-w3-HRk"/>
-                    </constraints>
-                    <state key="normal" title="Search"/>
-                </button>
                 <tableView clipsSubviews="YES" contentMode="scaleToFill" alwaysBounceVertical="YES" style="plain" separatorStyle="default" rowHeight="-1" estimatedRowHeight="-1" sectionHeaderHeight="28" sectionFooterHeight="28" translatesAutoresizingMaskIntoConstraints="NO" id="CmT-iN-tsa">
                     <rect key="frame" x="0.0" y="132" width="375" height="471"/>
                     <color key="backgroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
@@ -50,11 +44,24 @@
                 <activityIndicatorView opaque="NO" contentMode="scaleToFill" horizontalHuggingPriority="750" verticalHuggingPriority="750" animating="YES" style="gray" translatesAutoresizingMaskIntoConstraints="NO" id="f9T-W6-lIF">
                     <rect key="frame" x="177" y="357" width="20" height="20"/>
                 </activityIndicatorView>
+                <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="p7B-we-2S3">
+                    <rect key="frame" x="205" y="94" width="154" height="30"/>
+                    <state key="normal" title="Button"/>
+                </button>
+                <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="DzS-F5-jJU">
+                    <rect key="frame" x="16" y="94" width="166" height="30"/>
+                    <constraints>
+                        <constraint firstAttribute="width" constant="166" id="YkZ-w3-HRk"/>
+                    </constraints>
+                    <state key="normal" title="Search"/>
+                </button>
             </subviews>
             <color key="backgroundColor" red="1" green="1" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
             <constraints>
-                <constraint firstItem="DzS-F5-jJU" firstAttribute="centerX" secondItem="1" secondAttribute="centerX" id="5xi-N5-ZfQ"/>
+                <constraint firstItem="DzS-F5-jJU" firstAttribute="centerX" secondItem="1" secondAttribute="centerX" constant="-88.5" id="5xi-N5-ZfQ"/>
                 <constraint firstItem="DzS-F5-jJU" firstAttribute="top" secondItem="JzX-CJ-QJc" secondAttribute="bottom" constant="8" id="C9r-ej-Iuy"/>
+                <constraint firstItem="p7B-we-2S3" firstAttribute="top" secondItem="DzS-F5-jJU" secondAttribute="top" id="DzS-5x-6mQ"/>
+                <constraint firstItem="y21-fw-XCP" firstAttribute="trailing" secondItem="p7B-we-2S3" secondAttribute="trailing" constant="16" id="IbI-hh-i7Q"/>
                 <constraint firstItem="ea3-ZW-eYC" firstAttribute="centerX" secondItem="1" secondAttribute="centerX" id="IhE-BO-Ai0"/>
                 <constraint firstItem="y21-fw-XCP" firstAttribute="top" secondItem="ea3-ZW-eYC" secondAttribute="bottom" constant="-41" id="ON1-xg-deC"/>
                 <constraint firstItem="y21-fw-XCP" firstAttribute="bottom" secondItem="CmT-iN-tsa" secondAttribute="bottom" id="PZD-UN-Qu5"/>
@@ -63,10 +70,12 @@
                 <constraint firstItem="y21-fw-XCP" firstAttribute="trailing" secondItem="CmT-iN-tsa" secondAttribute="trailing" id="cV5-4A-uVW"/>
                 <constraint firstItem="CmT-iN-tsa" firstAttribute="leading" secondItem="y21-fw-XCP" secondAttribute="leading" id="e7H-kb-J4d"/>
                 <constraint firstAttribute="trailing" secondItem="JzX-CJ-QJc" secondAttribute="trailing" constant="47" id="eIl-GP-q0a"/>
+                <constraint firstItem="p7B-we-2S3" firstAttribute="bottom" secondItem="DzS-F5-jJU" secondAttribute="bottom" id="jQA-xA-qca"/>
                 <constraint firstItem="f9T-W6-lIF" firstAttribute="centerY" secondItem="CmT-iN-tsa" secondAttribute="centerY" id="nW6-fU-sMS"/>
                 <constraint firstItem="CmT-iN-tsa" firstAttribute="top" secondItem="DzS-F5-jJU" secondAttribute="bottom" constant="8" id="ntF-EZ-xxX"/>
                 <constraint firstItem="f9T-W6-lIF" firstAttribute="centerX" secondItem="CmT-iN-tsa" secondAttribute="centerX" id="qBz-Cd-wcT"/>
                 <constraint firstItem="JzX-CJ-QJc" firstAttribute="leading" secondItem="1" secondAttribute="leading" constant="48" id="uVA-gn-2GT"/>
+                <constraint firstItem="p7B-we-2S3" firstAttribute="leading" secondItem="DzS-F5-jJU" secondAttribute="trailing" constant="23" id="wRZ-VW-4kl"/>
             </constraints>
             <simulatedNavigationBarMetrics key="simulatedTopBarMetrics" translucent="NO" prompted="NO"/>
             <viewLayoutGuide key="safeArea" id="y21-fw-XCP"/>

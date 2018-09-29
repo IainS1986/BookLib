@@ -1,11 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using System.Web;
 using System.Xml;
 using BookLib.Core.Api;
 using BookLib.Core.Model;
+using HtmlAgilityPack;
 
 namespace BookLib.Core.Search
 {
@@ -13,41 +15,46 @@ namespace BookLib.Core.Search
     {
         public async Task<List<Book>> Search(string search)
         {
-            // Search query
-            // Anoyingly, Graphic Audio can either return search results OR
-            // returns a Series overview if it decides you're searching for a 
-            // series - i.e. Search for Batman will return DC Series overview :/
-            string encodedSearch = HttpUtility.UrlEncode(search).Replace("+", "%20");
-            string query = $"/catalogsearch/result/?q={encodedSearch}";
+            List<Book> books = new List<Book>();
+            string query = $"/catalogsearch/result/?q={HTMLHelpers.EncodeSearch(search)}";
             string response = await HTMLHelpers.CreateHttpRequest(new Uri($"{GraphicAudioConsts.BaseURL}{query}"));
+            var htmlDoc = new HtmlDocument();
+            htmlDoc.LoadHtml(response);
 
-            string regexResultQuery = "(?=<li class=\"item col-md-3 col-smh-4\">)(.*?)(?<=<\\/li>)";
-            MatchCollection products = Regex.Matches(response, regexResultQuery, RegexOptions.Singleline);
+            // Get all books (Figure with class span4-cat slide
+            var products = htmlDoc.DocumentNode.Descendants("li").
+                                Where(x => x.Attributes != null &&
+                                           x.Attributes.Any(y => y.Name == "class" &&
+                                                            y.Value == "item col-md-3 col-smh-4")).ToList();
 
-            var books = new List<Book>();
-            foreach(Match prod in products)
+            foreach(var prod in products)
             {
-                //XML parse
                 try
                 {
                     Book book = new Book();
                     book.Engine = SearchType.GraphicAudio;
 
-                    XmlDocument xmlDocument = new XmlDocument();
-                    xmlDocument.LoadXml(prod.Value);
+                    var productNode = prod.Descendants("a").FirstOrDefault(x => x.Attributes != null &&
+                                                                           x.Attributes.Any(y => y.Name == "class" &&
+                                                                                            y.Value == "product-image"));
+                    book.ProductPage = productNode?.Attributes["href"].Value;
+                    book.Title = productNode?.Attributes["title"].Value;
 
-                    XmlNode productNode = xmlDocument.SelectSingleNode(".//a[contains(@class, 'product-image')]");
-                    book.ProductPage = productNode.Attributes["href"].Value;
-                    book.Title = productNode.Attributes["title"].Value;
-
-                    XmlNode imageNode = productNode.SelectSingleNode(".//img[contains(@class, 'myitems-product-image')]");
-                    book.ThumbnailURL = imageNode.Attributes["src"].Value;
+                    var imageNode = prod.Descendants("img").FirstOrDefault(x => x.Attributes != null &&
+                                                                           x.Attributes.Any(y => y.Name == "class" &&
+                                                                                            y.Value == "myitems-product-image"));
+                    book.ThumbnailURL = imageNode?.Attributes["src"].Value;
                     book.ImageURL = book.ThumbnailURL.Replace("small_image/265", "image/458");
                     book.Author = "GraphicAudio";
 
+                    var seriesNode = prod.Descendants("div").FirstOrDefault(x => x.Attributes != null &&
+                                                                           x.Attributes.Any(y => y.Name == "class" &&
+                                                                                            y.Value == "series-name"));
+                    book.Series = seriesNode?.InnerText;
+
                     books.Add(book);
                 }
-                catch(Exception ex)
+                catch (Exception ex)
                 {
                     Console.WriteLine("Error parsing Product " + ex.Message);
                 }
@@ -62,8 +69,25 @@ namespace BookLib.Core.Search
 
             try
             {
-                book.Synopsis = GetSynopsis(response);
-                book.PublishDate = GetReleaseDate(response);
+                var htmlDoc = new HtmlDocument();
+                htmlDoc.LoadHtml(response);
+
+                var synopsisNode = htmlDoc.DocumentNode.Descendants("div").FirstOrDefault(x => x.Attributes != null &&
+                                                                           x.Attributes.Any(y => y.Name == "class" &&
+                                                                                            y.Value == "description"));
+                book.Synopsis = synopsisNode?.InnerHtml;
+
+                var releaseNode = htmlDoc.DocumentNode.Descendants("div").FirstOrDefault(x => x.Attributes != null &&
+                                                                           x.Attributes.Any(y => y.Name == "class" &&
+                                                                                            y.Value == "product-releasedate"));
+                string fullReleaseDate = releaseNode?.InnerHtml;
+                string releaseDate = fullReleaseDate.Replace("<label>Release Date:</label>", string.Empty).Trim();
+                DateTime date;
+                if (DateTime.TryParse(releaseDate, out date))
+                {
+                    book.PublishDate = date;
+                }
+
                 return true;
             }
             catch(Exception ex)
@@ -72,26 +96,6 @@ namespace BookLib.Core.Search
             }
 
             return false;   
-        }
-
-        private string GetSynopsis(string html)
-        {
-            return HTMLHelpers.Scrape(html, "<div class=\"description\">", "</div>");
-        }
-
-        private DateTime? GetReleaseDate(string html)
-        {
-            string fullReleaseDate = HTMLHelpers.Scrape(html, "<div class=\"product-releasedate\">", "</div>");
-
-            //Strip out the annoying label
-            string releaseDate = fullReleaseDate.Replace("<label>Release Date:</label>", string.Empty).Trim();
-
-            DateTime date;
-            if (DateTime.TryParse(releaseDate, out date))
-            {
-                return date;
-            }
-            return null;
         }
     }
 }

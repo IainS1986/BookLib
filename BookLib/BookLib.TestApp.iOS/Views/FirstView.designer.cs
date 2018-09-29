@@ -13,6 +13,9 @@ namespace BookLib.TestApp.iOS.Views
 	partial class FirstView
 	{
 		[Outlet]
+		UIKit.UIButton ModeButton { get; set; }
+
+		[Outlet]
 		UIKit.UIButton SearchButton { get; set; }
 
 		[Outlet]
@@ -31,6 +34,11 @@ namespace BookLib.TestApp.iOS.Views
 				SearchButton = null;
 			}
 
+			if (SearchInProgress != null) {
+				SearchInProgress.Dispose ();
+				SearchInProgress = null;
+			}
+
 			if (SearchInput != null) {
 				SearchInput.Dispose ();
 				SearchInput = null;
@@ -41,9 +49,9 @@ namespace BookLib.TestApp.iOS.Views
 				SearchResults = null;
 			}
 
-			if (SearchInProgress != null) {
-				SearchInProgress.Dispose ();
-				SearchInProgress = null;
+			if (ModeButton != null) {
+				ModeButton.Dispose ();
+				ModeButton = null;
 			}
 		}
 	}

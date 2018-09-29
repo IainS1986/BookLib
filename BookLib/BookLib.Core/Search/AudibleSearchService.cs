@@ -2,13 +2,16 @@
 using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
+using System.Linq;
 using System.Net;
+using System.Net.Http.Headers;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using System.Web;
 using System.Xml;
 using BookLib.Core.Api;
 using BookLib.Core.Model;
+using HtmlAgilityPack;
 using Refit;
 
 namespace BookLib.Core.Search
@@ -19,62 +22,103 @@ namespace BookLib.Core.Search
 
         public async Task<List<Book>> Search(string search)
         {
-            var query = $"{AudibleConsts.BaseURL}/search?keywords={HttpUtility.UrlEncode(search)}".Replace("+", "%20");
-            string response = await HTMLHelpers.CreateHttpRequest(new Uri(query));
-
-            //Get results list - this returns the URLs to link to
-            string regexSubstringSearch = "(?<={0})(.*)(?={1})";
-            string regexProduct = string.Format(regexSubstringSearch, "href=\"\\/pd\\/", "\\?qid");
-            string regexCovers = string.Format(regexSubstringSearch, "https://m.media-amazon.com/images/I/", "\\._");
-
-            var product = Regex.Matches(response, regexProduct);
-            var covers = Regex.Matches(response, regexCovers);
-
-            // For each match, build up a simple substring from one to another
-            Dictionary<Match, string> matchesToHtml = new Dictionary<Match, string>();
-            Dictionary<Match, Match> productMatchToCoverMatch = new Dictionary<Match, Match>();
-            for (int i = 0; i < product.Count; i++)
-            {
-                var firstIndex = response.IndexOf($"{product[i].ToString()}?qid", StringComparison.Ordinal);
-                var length = response.Length - firstIndex;;
-                if (i<product.Count - 1)
-                {
-                    var lastIndex = response.IndexOf($"{product[i + 1].ToString()}?qid", StringComparison.Ordinal);
-                    length = lastIndex - firstIndex;
-                }
-
-                matchesToHtml.Add(product[i], response.Substring(firstIndex, length));
-                productMatchToCoverMatch.Add(product[i], covers[i]);
-            }
-
             List<Book> books = new List<Book>();
-            int c = 0;
-            foreach(var entry in matchesToHtml)
+            var query = $"{AudibleConsts.BaseURL}/search?keywords={HTMLHelpers.EncodeSearch(search)}";
+            string response = await HTMLHelpers.CreateHttpRequest(new Uri(query));
+            var htmlDoc = new HtmlDocument();
+            htmlDoc.LoadHtml(response);
+
+            // Get all books (Figure with class span4-cat slide
+            var products = htmlDoc.DocumentNode.Descendants("li").
+                                Where(x => x.Attributes != null &&
+                                           x.Attributes.Any(y => y.Name == "class" &&
+                                                            y.Value.Contains("bc-list-item") &&
+                                                            y.Value.Contains("productListItem"))).ToList();
+
+            foreach(var prod in products)
             {
                 try
                 {
-                    Console.WriteLine($"Scraping for book {entry.Key}");
-                    string id = GetCoverID(response, productMatchToCoverMatch[entry.Key]);
+                    Book book = new Book();
+                    book.Engine = SearchType.Audible;
 
-                    books.Add(new Book()
+                    var productNode = prod.Descendants("img").FirstOrDefault(x => x.Attributes != null &&
+                                                                                x.Attributes.Any(y => y.Name == "class" &&
+                                                                                                 y.Value.Contains("bc-pub-block") &&
+                                                                                                 y.Value.Contains("bc-image-inset-border")));
+                    book.ThumbnailURL = productNode?.Attributes["src"].Value;
+                    book.ImageURL = book.ThumbnailURL.Replace("SL5", "SL512");
+                    book.ThumbnailURL = book.ThumbnailURL.Replace("SL5", "SL128");
+
+
+                    var titleRootNode = prod.Descendants("h3").FirstOrDefault(x => x.Attributes != null &&
+                                                                              x.Attributes.Any(y => y.Name == "class" &&
+                                                                                               y.Value.Contains("bc-size-medium")));
+                    var titleNode = titleRootNode.Descendants("a").FirstOrDefault(x => x.Attributes != null &&
+                                                                                x.Attributes.Any(y => y.Name == "class" &&
+                                                                                                 y.Value.Contains("bc-link") &&
+                                                                                                 y.Value.Contains("bc-color-link")) &&
+                                                                                x.Attributes.Any(y => y.Name == "tabindex" &&
+                                                                                                      y.Value == "0"));
+                    book.Title = titleNode.InnerText;
+
+                    var authorRootNode = prod.Descendants("li").FirstOrDefault(x => x.Attributes != null &&
+                                                                                x.Attributes.Any(y => y.Name == "class" &&
+                                                                                                 y.Value.Contains("bc-list-item") &&
+                                                                                                 y.Value.Contains("authorLabel")));
+                    var authorNode = authorRootNode.Descendants("a").FirstOrDefault(x => x.Attributes != null &&
+                                                                                x.Attributes.Any(y => y.Name == "class" &&
+                                                                                                 y.Value.Contains("bc-link") &&
+                                                                                                 y.Value.Contains("bc-color-link")));
+                    book.Author = authorNode.InnerText;
+
+                    var narratorRootNode = prod.Descendants("li").FirstOrDefault(x => x.Attributes != null &&
+                                                                                x.Attributes.Any(y => y.Name == "class" &&
+                                                                                                 y.Value.Contains("bc-list-item") &&
+                                                                                                 y.Value.Contains("narratorLabel")));
+                    var narratorNode = narratorRootNode.Descendants("a").FirstOrDefault(x => x.Attributes != null &&
+                                                                                x.Attributes.Any(y => y.Name == "class" &&
+                                                                                                 y.Value.Contains("bc-link") &&
+                                                                                                 y.Value.Contains("bc-color-link")));
+                    book.Narrator = narratorNode.InnerText;
+
+                    var ratingRootNode = prod.Descendants("li").FirstOrDefault(x => x.Attributes != null &&
+                                                                                x.Attributes.Any(y => y.Name == "class" &&
+                                                                                                 y.Value.Contains("bc-list-item") &&
+                                                                                                 y.Value.Contains("ratingsLabel")));
+                    var ratingNode = ratingRootNode.Descendants("span").FirstOrDefault(x => x.Attributes != null &&
+                                                                                x.Attributes.Any(y => y.Name == "class" &&
+                                                                                                 y.Value.Contains("bc-text") &&
+                                                                                                 y.Value.Contains("bc-pub-offscreen")));
+
+                    var dateRootNode = prod.Descendants("li").FirstOrDefault(x => x.Attributes != null &&
+                                                                                x.Attributes.Any(y => y.Name == "class" &&
+                                                                                                 y.Value.Contains("bc-list-item") &&
+                                                                                                 y.Value.Contains("releaseDateLabel")));
+                    var dateNode = dateRootNode.Descendants("span").FirstOrDefault(x => x.Attributes != null &&
+                                                                                x.Attributes.Any(y => y.Name == "class" &&
+                                                                                                 y.Value.Contains("bc-text") &&
+                                                                                                 y.Value.Contains("bc-size-small") &&
+                                                                                                 y.Value.Contains("bc-color-secondary")));
+                    var datestr = dateNode.InnerText.Replace("Release date:", string.Empty).Trim();
+                    DateTime date;
+                    if (DateTime.TryParseExact(datestr, "dd-MM-yy", CultureInfo.InvariantCulture, DateTimeStyles.AssumeLocal, out date))
                     {
-                        Engine = SearchType.Audible,
-                        ProductPage = entry.Key.Value,
-                        Title = GetTitle(entry.Value, $"{entry.Key}?qid"),
-                        Author = $"{GetAuthor(entry.Value)}",
-                        Narrator = GetNarrator(entry.Value),
-                        PublishDate = GetReleaseDate(entry.Value),
-                        ThumbnailURL = string.Format(AudibleCoverURL, id, 128),
-                        ImageURL = string.Format(AudibleCoverURL, id, 512),
-                    });
+                        book.PublishDate = date;
+                    }
 
-                    Console.WriteLine($"Done {++c} of {matchesToHtml.Count}");
+                    string page = titleNode.Attributes["href"].Value;
+                    int queryIndex = page.IndexOf('?');
+                    book.ProductPage = page.Substring(0, queryIndex);
+
+                    books.Add(book);
                 }
-                catch(Exception ex)
+                catch (Exception ex)
                 {
-                    Console.WriteLine("Error scraping Audible for book, " + ex.Message);
+                    Console.WriteLine($"Error fetching search - {ex.Message}");
                 }
             }
+
             return books;
         }
 
@@ -88,12 +132,24 @@ namespace BookLib.Core.Search
 
             Console.WriteLine($"Scraping for Extra Details for {book.ProductPage}");
 
-            string bookPage = $"{AudibleConsts.BaseURL}/pd/{book.ProductPage}";
+            string bookPage = $"{AudibleConsts.BaseURL}{book.ProductPage}";
             string bookHTML = await HTMLHelpers.CreateHttpRequest(new Uri(bookPage));
+            var htmlDoc = new HtmlDocument();
+            htmlDoc.LoadHtml(bookHTML);
 
             try
             {
-                book.Synopsis = GetSynopsis(bookHTML);
+                var summaryRoot = htmlDoc.DocumentNode.Descendants("div").
+                                         FirstOrDefault(x => x.Attributes != null &&
+                                                             x.Attributes.Any(y => y.Name == "class" &&
+                                                                                   y.Value.Contains("bc-container") &&
+                                                                                   y.Value.Contains("productPublisherSummary")));
+                var summary = summaryRoot.Descendants("div").
+                                         FirstOrDefault(x => x.Attributes != null &&
+                                                             x.Attributes.Any(y => y.Name == "class" &&
+                                                                                   y.Value.Contains("bc-section") &&
+                                                                                   y.Value.Contains("bc-spacing-medium")));
+                book.Synopsis = summary?.InnerHtml;
             }
             catch(Exception ex)
             {
@@ -103,51 +159,6 @@ namespace BookLib.Core.Search
 
             Console.WriteLine($"Done!");
             return true;
-        }
-
-        private string GetSynopsis(string html)
-        {
-            string search = ">Summary<";
-            int index = html.IndexOf(search, StringComparison.Ordinal);
-            if (index == -1)
-            {
-                return string.Empty;
-            }
-
-            string subHTML = html.Substring(index);
-            return HTMLHelpers.Scrape(subHTML, "bc-color-secondary\"  >", "</span>");
-        }
-
-        private string GetCoverID(string html, Match cover)
-        {
-            return HTMLHelpers.Scrape(html, cover, ' ', '.');
-        }
-
-        private DateTime? GetReleaseDate(string html)
-        {
-            string datestr = HTMLHelpers.Scrape(html, "Release date:", ' ', '<');
-            DateTime date;
-            if (DateTime.TryParseExact(datestr, "dd-MM-yy", CultureInfo.InvariantCulture, DateTimeStyles.AssumeLocal, out date))
-            {
-                return date;
-            }
-
-            return null;
-        }
-
-        private string GetNarrator(string html)
-        {
-            return HTMLHelpers.Scrape(html, "href=\"/search?searchNarrator=", '>', '<');
-        }
-
-        private string GetAuthor(string html)
-        {
-            return HTMLHelpers.Scrape(html, "href=\"/search?searchAuthor=", '>', '<');
-        }
-
-        private string GetTitle(string html, string substring)
-        {
-            return HTMLHelpers.Scrape(html, substring, '>', '<');
         }
     }
 }
