@@ -1,18 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Globalization;
-using System.IO;
 using System.Linq;
-using System.Net;
-using System.Net.Http.Headers;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
-using System.Web;
-using System.Xml;
 using BookLib.Core.Api;
 using BookLib.Core.Model;
 using HtmlAgilityPack;
-using Refit;
 
 namespace BookLib.Core.Search
 {
@@ -46,9 +40,12 @@ namespace BookLib.Core.Search
                                                                                 x.Attributes.Any(y => y.Name == "class" &&
                                                                                                  y.Value.Contains("bc-pub-block") &&
                                                                                                  y.Value.Contains("bc-image-inset-border")));
-                    book.ThumbnailURL = productNode?.Attributes["src"].Value;
-                    book.ImageURL = book.ThumbnailURL.Replace("SL5", "SL512");
-                    book.ThumbnailURL = book.ThumbnailURL.Replace("SL5", "SL128");
+                    // Get the ID with regex
+                    string regex = "(?<=/I/)(.*?)(?=._S)";
+                    Match id = Regex.Match(productNode?.Attributes["src"].Value, regex, RegexOptions.Singleline);
+            
+                    book.ThumbnailURL = string.Format(AudibleCoverURL, id.Value, 128);
+                    book.ImageURL = string.Format(AudibleCoverURL, id.Value, 512);
 
 
                     var titleRootNode = prod.Descendants("h3").FirstOrDefault(x => x.Attributes != null &&
