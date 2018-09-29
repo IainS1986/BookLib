@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using BookLib.Core.Api;
+using BookLib.Core.Extensions;
 using BookLib.Core.Model;
 using HtmlAgilityPack;
 
@@ -19,10 +20,7 @@ namespace BookLib.Core.Search
             htmlDoc.LoadHtml(response);
 
             // Get all books
-            var products = htmlDoc.DocumentNode.Descendants("div").
-                                   Where(x => x.Attributes != null &&
-                                              x.Attributes.Any(y => y.Name == "class" &&
-                                                                    y.Value == "releaseListing with-bottom-border")).ToList();
+            var products = htmlDoc.DocumentNode.Descendants("div").WithAttribute("class", "releaseListing with-bottom-border");
 
             foreach(var prod in products)
             {
@@ -32,10 +30,7 @@ namespace BookLib.Core.Search
                     book.Engine = SearchType.BigFinish;
 
                     // Product Link
-                    var prodLinkNode = prod.Descendants("div").
-                                           Where(x => x.Attributes != null &&
-                                                      x.Attributes.Any(y => y.Name == "class" &&
-                                                                            y.Value == "coverRelease")).FirstOrDefault();
+                    var prodLinkNode = prod.Descendants("div").FirstOrDefaultWithAttribute("class", "coverRelease");
 
                     // Covers
                     var imgLinkNode = prodLinkNode.Descendants("img").FirstOrDefault();
@@ -54,10 +49,7 @@ namespace BookLib.Core.Search
                     }
 
                     // Series Name
-                    var seriesNode = prod.Descendants("span").
-                                           Where(x => x.Attributes != null &&
-                                                      x.Attributes.Any(y => y.Name == "class" &&
-                                                                       y.Value == "rangeName")).FirstOrDefault();
+                    var seriesNode = prod.Descendants("span").FirstOrDefaultWithAttribute("class", "rangeName");
                     var aSeriesNode = seriesNode?.Descendants("a").FirstOrDefault();
                     string seriesName = aSeriesNode?.InnerText.Trim().
                                                    Replace("\r", string.Empty).
@@ -67,10 +59,7 @@ namespace BookLib.Core.Search
                     book.SeriesPage = aSeriesNode?.Attributes["href"].Value;
 
                     // Book name
-                    var bookNode = prod.Descendants("h3").
-                                           Where(x => x.Attributes != null &&
-                                                      x.Attributes.Any(y => y.Name == "class" &&
-                                                                       y.Value == "releaseHeader")).FirstOrDefault();
+                    var bookNode = prod.Descendants("h3").FirstOrDefaultWithAttribute("class", "releaseHeader");
                     var aBookNode = bookNode?.Descendants("a").FirstOrDefault();
                     string bookName = aBookNode?.InnerText.Trim().
                                                    Replace("\r", string.Empty).
@@ -99,9 +88,7 @@ namespace BookLib.Core.Search
                 var htmlDoc = new HtmlDocument();
                 htmlDoc.LoadHtml(response);
 
-                var synopsis = htmlDoc.DocumentNode.Descendants("div").Where(x => x.Attributes != null &&
-                                                                                  x.Attributes.Any(y => y.Name == "class" &&
-                                                                                                        y.Value == "releaseContent")).FirstOrDefault();
+                var synopsis = htmlDoc.DocumentNode.Descendants("div").FirstOrDefaultWithAttribute("class", "releaseContent");
                 book.Synopsis = synopsis?.InnerHtml;
                 return true;
             }

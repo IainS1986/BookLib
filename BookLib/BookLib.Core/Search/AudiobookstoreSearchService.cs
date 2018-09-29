@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using BookLib.Core.Api;
+using BookLib.Core.Extensions;
 using BookLib.Core.Model;
 using BookLib.Core.Model.Audiobookstore;
 using HtmlAgilityPack;
@@ -22,19 +23,14 @@ namespace BookLib.Core.Search
             htmlDoc.LoadHtml(response);
 
             // Get all books (Figure with class span4-cat slide
-            var products = htmlDoc.DocumentNode.Descendants("figure").
-                                Where(x => x.Attributes != null &&
-                                           x.Attributes.Any(y => y.Name == "class" &&
-                                                            y.Value == "span4-cat slide")).ToList();
+            var products = htmlDoc.DocumentNode.Descendants("figure").WithAttribute("class", "span4-cat slide");
 
             foreach(var prod in products)
             {
                 Book book = new Book();
                 book.Engine = SearchType.Audiobookstore;
 
-                var productNode = prod.Descendants("a").FirstOrDefault(x => x.Attributes != null &&
-                                                                            x.Attributes.Any(y => y.Name == "id" &&
-                                                                                             y.Value == "trigger"));
+                var productNode = prod.Descendants("a").FirstOrDefaultWithAttribute("id", "trigger");
                 
                 book.ProductPage = productNode?.Attributes["dataProductLink"].Value;
                 book.Title = productNode?.Attributes["dataProductName"].Value;
@@ -101,10 +97,7 @@ namespace BookLib.Core.Search
                 var htmlDoc = new HtmlDocument();
                 htmlDoc.LoadHtml(response);
 
-                var jsonNode = htmlDoc.DocumentNode.Descendants("script").
-                                      FirstOrDefault(x => x.Attributes != null &&
-                                                          x.Attributes.Any(y => y.Name == "type" &&
-                                                                                y.Value == "application/ld+json"));
+                var jsonNode = htmlDoc.DocumentNode.Descendants("script").FirstOrDefaultWithAttribute("type", "application/ld+json");
                 RootObject root = JsonConvert.DeserializeObject<RootObject>(jsonNode?.InnerHtml);
                 if (root != null)
                 {
@@ -123,10 +116,7 @@ namespace BookLib.Core.Search
                 }
 
                 // Bigger cover image
-                var coverNode = htmlDoc.DocumentNode.Descendants("img").
-                                        FirstOrDefault(x => x.Attributes != null &&
-                                                            x.Attributes.Any(y => y.Name == "id" &&
-                                                                                  y.Value == "imageAudiobookCoverArt"));
+                var coverNode = htmlDoc.DocumentNode.Descendants("img").FirstOrDefaultWithAttribute("id", "imageAudiobookCoverArt");
 
                 book.ImageURL = coverNode?.Attributes["src"].Value;
 

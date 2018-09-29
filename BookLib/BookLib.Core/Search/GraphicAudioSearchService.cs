@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using System.Web;
 using System.Xml;
 using BookLib.Core.Api;
+using BookLib.Core.Extensions;
 using BookLib.Core.Model;
 using HtmlAgilityPack;
 
@@ -22,10 +23,7 @@ namespace BookLib.Core.Search
             htmlDoc.LoadHtml(response);
 
             // Get all books (Figure with class span4-cat slide
-            var products = htmlDoc.DocumentNode.Descendants("li").
-                                Where(x => x.Attributes != null &&
-                                           x.Attributes.Any(y => y.Name == "class" &&
-                                                            y.Value == "item col-md-3 col-smh-4")).ToList();
+            var products = htmlDoc.DocumentNode.Descendants("li").WithAttribute("class", "item col-md-3 col-smh-4");
 
             foreach(var prod in products)
             {
@@ -34,22 +32,16 @@ namespace BookLib.Core.Search
                     Book book = new Book();
                     book.Engine = SearchType.GraphicAudio;
 
-                    var productNode = prod.Descendants("a").FirstOrDefault(x => x.Attributes != null &&
-                                                                           x.Attributes.Any(y => y.Name == "class" &&
-                                                                                            y.Value == "product-image"));
+                    var productNode = prod.Descendants("a").FirstOrDefaultWithAttribute("class", "product-image");
                     book.ProductPage = productNode?.Attributes["href"].Value;
                     book.Title = productNode?.Attributes["title"].Value;
 
-                    var imageNode = prod.Descendants("img").FirstOrDefault(x => x.Attributes != null &&
-                                                                           x.Attributes.Any(y => y.Name == "class" &&
-                                                                                            y.Value == "myitems-product-image"));
+                    var imageNode = prod.Descendants("img").FirstOrDefaultWithAttribute("class", "myitems-product-image");
                     book.ThumbnailURL = imageNode?.Attributes["src"].Value;
                     book.ImageURL = book.ThumbnailURL.Replace("small_image/265", "image/458");
                     book.Author = "GraphicAudio";
 
-                    var seriesNode = prod.Descendants("div").FirstOrDefault(x => x.Attributes != null &&
-                                                                           x.Attributes.Any(y => y.Name == "class" &&
-                                                                                            y.Value == "series-name"));
+                    var seriesNode = prod.Descendants("div").FirstOrDefaultWithAttribute("class", "series-name");
                     book.Series = seriesNode?.InnerText;
 
                     books.Add(book);
@@ -72,14 +64,10 @@ namespace BookLib.Core.Search
                 var htmlDoc = new HtmlDocument();
                 htmlDoc.LoadHtml(response);
 
-                var synopsisNode = htmlDoc.DocumentNode.Descendants("div").FirstOrDefault(x => x.Attributes != null &&
-                                                                           x.Attributes.Any(y => y.Name == "class" &&
-                                                                                            y.Value == "description"));
+                var synopsisNode = htmlDoc.DocumentNode.Descendants("div").FirstOrDefaultWithAttribute("class", "description");
                 book.Synopsis = synopsisNode?.InnerHtml;
 
-                var releaseNode = htmlDoc.DocumentNode.Descendants("div").FirstOrDefault(x => x.Attributes != null &&
-                                                                           x.Attributes.Any(y => y.Name == "class" &&
-                                                                                            y.Value == "product-releasedate"));
+                var releaseNode = htmlDoc.DocumentNode.Descendants("div").FirstOrDefaultWithAttribute("class", "product-releasedate");
                 string fullReleaseDate = releaseNode?.InnerHtml;
                 string releaseDate = fullReleaseDate.Replace("<label>Release Date:</label>", string.Empty).Trim();
                 DateTime date;

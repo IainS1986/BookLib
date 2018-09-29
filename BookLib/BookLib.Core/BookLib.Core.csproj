@@ -16,6 +16,7 @@
     <Folder Include="Api\DTO\GoodReads\" />
     <Folder Include="Converters\" />
     <Folder Include="Model\Audiobookstore\" />
+    <Folder Include="Extensions\" />
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="MvvmCross" Version="6.1.2" />

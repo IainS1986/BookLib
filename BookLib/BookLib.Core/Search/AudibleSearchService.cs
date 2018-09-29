@@ -5,6 +5,7 @@ using System.Linq;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using BookLib.Core.Api;
+using BookLib.Core.Extensions;
 using BookLib.Core.Model;
 using HtmlAgilityPack;
 
@@ -23,11 +24,7 @@ namespace BookLib.Core.Search
             htmlDoc.LoadHtml(response);
 
             // Get all books (Figure with class span4-cat slide
-            var products = htmlDoc.DocumentNode.Descendants("li").
-                                Where(x => x.Attributes != null &&
-                                           x.Attributes.Any(y => y.Name == "class" &&
-                                                            y.Value.Contains("bc-list-item") &&
-                                                            y.Value.Contains("productListItem"))).ToList();
+            var products = htmlDoc.DocumentNode.Descendants("li").WithAttribute("class", "bc-list-item", "productListItem");
 
             foreach(var prod in products)
             {
@@ -36,10 +33,7 @@ namespace BookLib.Core.Search
                     Book book = new Book();
                     book.Engine = SearchType.Audible;
 
-                    var productNode = prod.Descendants("img").FirstOrDefault(x => x.Attributes != null &&
-                                                                                x.Attributes.Any(y => y.Name == "class" &&
-                                                                                                 y.Value.Contains("bc-pub-block") &&
-                                                                                                 y.Value.Contains("bc-image-inset-border")));
+                    var productNode = prod.Descendants("img").FirstOrDefaultWithAttribute("class", "bc-pub-block", "bc-image-inset-border");
                     // Get the ID with regex
                     string regex = "(?<=/I/)(.*?)(?=._S)";
                     Match id = Regex.Match(productNode?.Attributes["src"].Value, regex, RegexOptions.Singleline);
@@ -48,55 +42,23 @@ namespace BookLib.Core.Search
                     book.ImageURL = string.Format(AudibleCoverURL, id.Value, 512);
 
 
-                    var titleRootNode = prod.Descendants("h3").FirstOrDefault(x => x.Attributes != null &&
-                                                                              x.Attributes.Any(y => y.Name == "class" &&
-                                                                                               y.Value.Contains("bc-size-medium")));
-                    var titleNode = titleRootNode.Descendants("a").FirstOrDefault(x => x.Attributes != null &&
-                                                                                x.Attributes.Any(y => y.Name == "class" &&
-                                                                                                 y.Value.Contains("bc-link") &&
-                                                                                                 y.Value.Contains("bc-color-link")) &&
-                                                                                x.Attributes.Any(y => y.Name == "tabindex" &&
-                                                                                                      y.Value == "0"));
+                    var titleRootNode = prod.Descendants("h3").FirstOrDefaultWithAttribute("class", "bc-size-medium");
+                    var titleNode = titleRootNode.Descendants("a").FirstOrDefaultWithAttribute("class", "bc-link", "bc-color-link");
                     book.Title = titleNode.InnerText;
 
-                    var authorRootNode = prod.Descendants("li").FirstOrDefault(x => x.Attributes != null &&
-                                                                                x.Attributes.Any(y => y.Name == "class" &&
-                                                                                                 y.Value.Contains("bc-list-item") &&
-                                                                                                 y.Value.Contains("authorLabel")));
-                    var authorNode = authorRootNode.Descendants("a").FirstOrDefault(x => x.Attributes != null &&
-                                                                                x.Attributes.Any(y => y.Name == "class" &&
-                                                                                                 y.Value.Contains("bc-link") &&
-                                                                                                 y.Value.Contains("bc-color-link")));
+                    var authorRootNode = prod.Descendants("li").FirstOrDefaultWithAttribute("class", "bc-list-item", "authorLabel");
+                    var authorNode = authorRootNode.Descendants("a").FirstOrDefaultWithAttribute("class", "bc-link", "bc-color-link");
                     book.Author = authorNode.InnerText;
 
-                    var narratorRootNode = prod.Descendants("li").FirstOrDefault(x => x.Attributes != null &&
-                                                                                x.Attributes.Any(y => y.Name == "class" &&
-                                                                                                 y.Value.Contains("bc-list-item") &&
-                                                                                                 y.Value.Contains("narratorLabel")));
-                    var narratorNode = narratorRootNode.Descendants("a").FirstOrDefault(x => x.Attributes != null &&
-                                                                                x.Attributes.Any(y => y.Name == "class" &&
-                                                                                                 y.Value.Contains("bc-link") &&
-                                                                                                 y.Value.Contains("bc-color-link")));
+                    var narratorRootNode = prod.Descendants("li").FirstOrDefaultWithAttribute("class", "bc-list-item", "narratorLabel");
+                    var narratorNode = narratorRootNode.Descendants("a").FirstOrDefaultWithAttribute("class", "bc-link", "bc-color-link");
                     book.Narrator = narratorNode.InnerText;
 
-                    var ratingRootNode = prod.Descendants("li").FirstOrDefault(x => x.Attributes != null &&
-                                                                                x.Attributes.Any(y => y.Name == "class" &&
-                                                                                                 y.Value.Contains("bc-list-item") &&
-                                                                                                 y.Value.Contains("ratingsLabel")));
-                    var ratingNode = ratingRootNode.Descendants("span").FirstOrDefault(x => x.Attributes != null &&
-                                                                                x.Attributes.Any(y => y.Name == "class" &&
-                                                                                                 y.Value.Contains("bc-text") &&
-                                                                                                 y.Value.Contains("bc-pub-offscreen")));
+                    var ratingRootNode = prod.Descendants("li").FirstOrDefaultWithAttribute("class", "bc-list-item", "ratingsLabel");
+                    var ratingNode = ratingRootNode.Descendants("span").FirstOrDefaultWithAttribute("class", "bc-text", "bc-pub-offscreen");
 
-                    var dateRootNode = prod.Descendants("li").FirstOrDefault(x => x.Attributes != null &&
-                                                                                x.Attributes.Any(y => y.Name == "class" &&
-                                                                                                 y.Value.Contains("bc-list-item") &&
-                                                                                                 y.Value.Contains("releaseDateLabel")));
-                    var dateNode = dateRootNode.Descendants("span").FirstOrDefault(x => x.Attributes != null &&
-                                                                                x.Attributes.Any(y => y.Name == "class" &&
-                                                                                                 y.Value.Contains("bc-text") &&
-                                                                                                 y.Value.Contains("bc-size-small") &&
-                                                                                                 y.Value.Contains("bc-color-secondary")));
+                    var dateRootNode = prod.Descendants("li").FirstOrDefaultWithAttribute("class", "bc-list-item", "releaseDateLabel");
+                    var dateNode = dateRootNode.Descendants("span").FirstOrDefaultWithAttribute("class", "bc-text", "bc-size-small", "bc-color-secondary");
                     var datestr = dateNode.InnerText.Replace("Release date:", string.Empty).Trim();
                     DateTime date;
                     if (DateTime.TryParseExact(datestr, "dd-MM-yy", CultureInfo.InvariantCulture, DateTimeStyles.AssumeLocal, out date))
@@ -136,16 +98,8 @@ namespace BookLib.Core.Search
 
             try
             {
-                var summaryRoot = htmlDoc.DocumentNode.Descendants("div").
-                                         FirstOrDefault(x => x.Attributes != null &&
-                                                             x.Attributes.Any(y => y.Name == "class" &&
-                                                                                   y.Value.Contains("bc-container") &&
-                                                                                   y.Value.Contains("productPublisherSummary")));
-                var summary = summaryRoot.Descendants("div").
-                                         FirstOrDefault(x => x.Attributes != null &&
-                                                             x.Attributes.Any(y => y.Name == "class" &&
-                                                                                   y.Value.Contains("bc-section") &&
-                                                                                   y.Value.Contains("bc-spacing-medium")));
+                var summaryRoot = htmlDoc.DocumentNode.Descendants("div").FirstOrDefaultWithAttribute("class", "bc-container", "productPublisherSummary");
+                var summary = summaryRoot.Descendants("div").FirstOrDefaultWithAttribute("class", "bc-section", "bc-spacing-medium");
                 book.Synopsis = summary?.InnerHtml;
             }
             catch(Exception ex)
