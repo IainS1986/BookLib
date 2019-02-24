@@ -32,15 +32,28 @@ namespace BookLib.Core.Search
 
                 var productNode = prod.Descendants("a").FirstOrDefaultWithAttribute("id", "trigger");
                 
-                book.ProductPage = productNode?.Attributes["dataProductLink"].Value;
-                book.Title = productNode?.Attributes["dataProductName"].Value;
-                book.Author = SplitOwners(productNode?.Attributes["dataAuthorName"].Value);
-                book.Narrator = SplitOwners(productNode?.Attributes["dataNarratorName"].Value);
-                book.ThumbnailURL = productNode?.Attributes["dataImage"].Value;
+                book.ProductPage = productNode?.SafeAttribute("href")?.Value;
+                book.Title = productNode?.SafeAttribute("dataProductName")?.Value;
+                book.Author = SplitOwners(productNode?.SafeAttribute("dataAuthorName")?.Value);
+                book.Narrator = SplitOwners(productNode?.SafeAttribute("dataNarratorName")?.Value);
+                book.ThumbnailURL = productNode?.SafeAttribute("dataImage")?.Value;
                 decimal rating;
-                if (decimal.TryParse(productNode?.Attributes["dataRating"].Value, out rating))
+                if (decimal.TryParse(productNode?.SafeAttribute("dataRating")?.Value, out rating))
                     book.Rating = rating;
- 
+
+                // Try new extra loading
+                if (string.IsNullOrEmpty(book.ThumbnailURL))
+                {
+                    var imageNode = prod.Descendants("img").FirstOrDefaultWithAttribute("class", "pro-img");
+                    book.ThumbnailURL = imageNode?.SafeAttribute("src")?.Value;
+                }
+
+                if (string.IsNullOrEmpty(book.Author))
+                {
+                    var authorNode = prod.Descendants("span").FirstOrDefaultWithAttribute("class", "authorName");
+                    book.Author = authorNode?.InnerText;
+                }
+
                 books.Add(book);
             }
 
@@ -132,6 +145,9 @@ namespace BookLib.Core.Search
 
         private string SplitOwners(string owners)
         {
+            if (string.IsNullOrEmpty(owners))
+                return owners;
+
             var splits = owners.Split('|').Where(x => !string.IsNullOrEmpty(x));
             return string.Join(", ", splits);
         }

@@ -25,7 +25,13 @@ namespace BookLib.TestApp.Droid.Views
             get => _synopsis.Text;
             set
             {
-                if(Build.VERSION.SdkInt >= BuildVersionCodes.N)
+                if (string.IsNullOrEmpty(value))
+                {
+                    _synopsis.TextFormatted = null;
+                    return;
+                }
+
+                if (Build.VERSION.SdkInt >= BuildVersionCodes.N)
                 {
                     _synopsis.TextFormatted = Html.FromHtml((value), Html.FromHtmlModeLegacy);
                 }

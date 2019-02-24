@@ -21,5 +21,14 @@ namespace BookLib.Core.Extensions
                                     x.Attributes.Any(y => y.Name == name &&
                                                           values.All(z => y.Value.Contains(z))));
         }
+
+        public static HtmlAttribute SafeAttribute(this HtmlNode node, string name)
+        {
+            if(node.Attributes.Contains(name))
+            {
+                return node.Attributes[name];
+            }
+            return null;
+        }
     }
 }
