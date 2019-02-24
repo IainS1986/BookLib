@@ -6580,14 +6580,11 @@ namespace BookLib.TestApp.Droid
 			// aapt resource value: 0x7f090091
 			public const int book_genre = 2131296401;
 			
-			// aapt resource value: 0x7f09008d
-			public const int book_overview = 2131296397;
+			// aapt resource value: 0x7f090092
+			public const int book_publish_date = 2131296402;
 			
 			// aapt resource value: 0x7f090090
-			public const int book_publish_date = 2131296400;
-			
-			// aapt resource value: 0x7f090092
-			public const int book_synopsis = 2131296402;
+			public const int book_synopsis = 2131296400;
 			
 			// aapt resource value: 0x7f09008e
 			public const int book_title = 2131296398;
@@ -6624,6 +6621,9 @@ namespace BookLib.TestApp.Droid
 			
 			// aapt resource value: 0x7f09003b
 			public const int collapseActionView = 2131296315;
+			
+			// aapt resource value: 0x7f09008d
+			public const int collapsing_toolbar = 2131296397;
 			
 			// aapt resource value: 0x7f090095
 			public const int container = 2131296405;

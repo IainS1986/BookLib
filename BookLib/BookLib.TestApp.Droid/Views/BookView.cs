@@ -1,15 +1,10 @@
-using System;
-using System.Collections.Generic;
 using Android.App;
 using Android.OS;
 using Android.Text;
 using Android.Text.Method;
 using Android.Widget;
-using BookLib.Core.Model;
 using BookLib.TestApp.Core.ViewModels;
 using MvvmCross.Binding.BindingContext;
-using MvvmCross.Droid.Support.V7.RecyclerView;
-using MvvmCross.Droid.Support.V7.RecyclerView.ItemTemplates;
 
 namespace BookLib.TestApp.Droid.Views
 {
